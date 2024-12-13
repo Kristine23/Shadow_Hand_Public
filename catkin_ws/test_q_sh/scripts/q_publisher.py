@@ -79,23 +79,24 @@ if __name__ == '__main__':
     rate = rospy.Rate(10)
 
     dir_path = os.path.dirname(os.path.realpath(__file__))
-    file_name = './catkin_ws/test_q_sh/scripts/test_q_for_path.txt'
+    file_name = './catkin_ws/test_q_sh/scripts/index_finger_q_values.txt'
 
     with open(file_name) as f:
         lines = [line.rstrip() for line in f]
 
     idx = 0
+    idx_add = 1
 
     while not rospy.is_shutdown():
         msg = JointTrajectory()
 
-        fingers_idx = [0, 1]
+        fingers_idx = [1]  # [1, 2, 3, 4, 0]
 
         config = lines[idx]
-        if idx + 10 < len(lines):
-            idx += 10
+        if idx + idx_add < len(lines):
+            idx += idx_add
         arrays = array_from_sting(config)
-        # print('arrays', arrays)
+        # print('arrays', type(arrays[0]))
 
         fingers_joint_names = [['rh_THJ1', 'rh_THJ2', 'rh_THJ3', 'rh_THJ4', 'rh_THJ5'], ['rh_FFJ1', 'rh_FFJ2', 'rh_FFJ3', 'rh_FFJ4'], [
             'rh_MFJ1', 'rh_MFJ2', 'rh_MFJ3', 'rh_MFJ4'], ['rh_RFJ1', 'rh_RFJ2', 'rh_RFJ3', 'rh_RFJ4'], ['rh_LFJ1', 'rh_LFJ2', 'rh_LFJ3', 'rh_LFJ4', 'rh_LFJ5']]
@@ -104,7 +105,8 @@ if __name__ == '__main__':
         msg_joint_positions = []
         for i in fingers_idx:
             msg_joint_names += fingers_joint_names[i]
-            msg_joint_positions += arrays[i]
+            reversed_array = arrays[i][::-1]
+            msg_joint_positions += reversed_array
 
         # msg.joint_names = ['rh_FFJ1', 'rh_FFJ2', 'rh_FFJ3', 'rh_FFJ4', 'rh_MFJ1', 'rh_MFJ2', 'rh_MFJ3', 'rh_MFJ4', 'rh_RFJ1', 'rh_RFJ2',
         #                   'rh_RFJ3', 'rh_RFJ4', 'rh_LFJ1', 'rh_LFJ2', 'rh_LFJ3', 'rh_LFJ4', 'rh_LFJ5', 'rh_THJ1', 'rh_THJ2', 'rh_THJ3', 'rh_THJ4', 'rh_THJ5']
