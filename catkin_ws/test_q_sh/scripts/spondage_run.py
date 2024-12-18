@@ -78,42 +78,39 @@ if __name__ == '__main__':
 
     rate = rospy.Rate(10)
 
-    f_0 = 'f0.txt'
-    f_1 = 'f1.txt'
-    f_2 = 'f2.txt'
-    f_3 = 'f3.txt'
-    f_4 = 'f4.txt'
-    f_01 = 'f01.txt'
-    f_014 = 'f014.txt'
-    f_0134 = 'f0134.txt'
-    f_full = 'f_full.txt'
-
     dir_path = os.path.dirname(os.path.realpath(__file__))
 
-    file_name = dir_path + '/' + f_full
-    file_name = dir_path + '/' + f_0134
-    file_name = dir_path + '/' + f_014
-    file_name = dir_path + '/' + f_01
-    file_name = dir_path + '/' + f_2
-    file_name = dir_path + '/' + f_3
-    file_name = dir_path + '/' + f_4
-    file_name = dir_path + '/' + f_1
-    file_name = dir_path + '/' + f_0
+    f_start = 'sh_small_movements_start.txt'
+    f_move = 'sh_small_movements_movement.txt'
 
-    file_name = './catkin_ws/test_q_sh/scripts/' + f_full
+    file_start = dir_path + '/' + f_start
+    file_move = dir_path + '/' + f_move
 
-    with open(file_name) as f:
+    file_start = './catkin_ws/test_q_sh/scripts/' + f_start
+    file_move = './catkin_ws/test_q_sh/scripts/' + f_move
+
+    with open(file_start) as f:
         lines = [line.rstrip() for line in f]
 
-    print('number_of_lines', len(lines))
+    with open(file_move) as f:
+        line_move = [line.rstrip() for line in f]
+
     idx = 0
     idx_add = 1
+    spondage_added = False
 
     while not rospy.is_shutdown():
+        if idx >= len(lines)-idx_add and not spondage_added:
+            ind = input("insert spondage. Press r when ready?")
+            if ind == 'r':
+                idx = 0
+                lines = line_move
+                spondage_added = True
+
         msg = JointTrajectory()
 
         fingers_idx = [1, 2, 3, 4, 0]
-
+        print(idx)
         config = lines[idx]
         if idx + idx_add < len(lines):
             idx += idx_add
