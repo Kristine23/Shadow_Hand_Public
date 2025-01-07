@@ -1,0 +1,43 @@
+{
+    "workbench.tree.indent": 13,
+    "workbench.tree.renderIndentGuides": "always",
+    "workbench.colorCustomizations": {
+        "tree.indentGuidesStroke": "#d689f9",
+        "tree.inactiveIndentGuidesStroke": "#525252",
+    },
+    "editor.formatOnSave": true,
+    "bazel.buildifierFixOnFormat": true,
+    //xml
+    "xml.format.joinCDATALines": true,
+    "xml.format.joinCommentLines": false,
+    "xml.format.joinContentLines": true,
+    "xml.format.enforceQuoteStyle": "preferred",
+    "xml.format.emptyElements": "collapse",
+    "xml.codeLens.enabled": true,
+    "xml.format.maxLineWidth": 0,
+    //c++
+    // "C_Cpp.clang_format_fallbackStyle": "google",
+    // "C_Cpp.clang_format_style": "file",
+    // "C_Cpp.clang_format_path": "/usr/bin/clang-format",
+    //python
+    "flake8.args": [
+        "--config=.flake8"
+    ],
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.autopep8",
+        "editor.formatOnSave": true,
+    },
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": "explicit"
+    },
+    "bandit.args": [
+        "--ini,",
+        "${workspaceFolder}/.bandit"
+    ],
+    "git.autoRepositoryDetection": true,
+    "git.repositoryScanMaxDepth": 100,
+    "scm.alwaysShowRepositories": true,
+    "scm.alwaysShowActions": false,
+    "scm.repositories.visible": 399,
+    "ros.distro": "noetic",
+}
