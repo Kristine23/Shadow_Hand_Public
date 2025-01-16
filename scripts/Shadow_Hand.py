@@ -2,6 +2,7 @@ import Math_Utilities as mu
 import Mesh_Utilities
 import numpy as np
 import PyPlotting
+import os
 
 
 
@@ -777,8 +778,10 @@ class Thumb(Finger):
     BODY_NAMES = ["rh_thbase", "rh_thproximal" , "rh_thhub" , "rh_thmiddle", "rh_thdistal"]
     JOINT_NAMES = ["rh_THJ5", "rh_THJ4", "rh_THJ3" ,  "rh_THJ2", "rh_THJ1" ]
     ACTUARTOR_NAMES = ["rh_A_THJ5", "rh_A_THJ4", "rh_A_THJ3" ,  "rh_A_THJ2", "rh_A_THJ1" ]
-    PARTH_2_STL = '/home/klinkby/Documents/Mujoco_Py_Workspace/Finger_Tip_Manipulation_Shadow_Hand/Shadow_Hand_21_03_2024/assets/th_distal_pst.obj'
-    PARTH_2_JSON = '/home/klinkby/Documents/Mujoco_Py_Workspace/Finger_Tip_Manipulation_Shadow_Hand/Shadow_Hand_21_03_2024/assets/th_distal_pst.json'
+
+    path = os.path.dirname(os.path.realpath(__file__))
+    PARTH_2_STL = path + '/Shadow_Hand_21_03_2024/assets/th_distal_pst.obj'
+   #PARTH_2_JSON = '/home/klinkby/Documents/Mujoco_Py_Workspace/Finger_Tip_Manipulation_Shadow_Hand/Shadow_Hand_21_03_2024/assets/th_distal_pst.json'
     
     
     MESH_NAME = 'rh_TH1_z'
@@ -850,9 +853,9 @@ class Thumb(Finger):
     
 
 class MF(Finger):
-    
-    PARTH_2_STL = '/home/klinkby/Documents/Mujoco_Py_Workspace/Finger_Tip_Manipulation_Shadow_Hand/Shadow_Hand_21_03_2024/assets/f_distal_pst.obj'
-    PARTH_2_JSON = '/home/klinkby/Documents/Mujoco_Py_Workspace/Finger_Tip_Manipulation_Shadow_Hand/Shadow_Hand_21_03_2024/assets/f_distal_pst.json'
+    path = os.path.dirname(os.path.realpath(__file__))
+    PARTH_2_STL =path +'/Shadow_Hand_21_03_2024/assets/f_distal_pst.obj'
+    #PARTH_2_JSON = '/home/klinkby/Documents/Mujoco_Py_Workspace/Finger_Tip_Manipulation_Shadow_Hand/Shadow_Hand_21_03_2024/assets/f_distal_pst.json'
     
     
     spring_constant = 10.2 #N/m # to do change at some point

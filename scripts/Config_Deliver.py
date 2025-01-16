@@ -10,7 +10,7 @@ class Config_Deliver:
     
     def __init__(self, shadow_hand, writing_interval):
         self.shadow_hand = shadow_hand
-        self.radian_change_pr_sec = 1.57/5 # pi/2 pr sec
+        self.radian_change_pr_sec = 1.57/3 # pi/2 pr sec
         self.writing_interval = writing_interval
         self.max_radian_change = self.radian_change_pr_sec * writing_interval
         
@@ -76,18 +76,24 @@ class Config_Deliver:
                 q = fingers_config[idx][:-2]
             else: 
                 q = np.zeros(finger.number_joints)
-                match i:
-                    case 1:
+                if i == 1: 
                         q[0] = finger.min_limits[0]
-                    case 2: 
+                elif i == 2: 
                         q[0] = config[1][0]
-                    case 3:
+                elif i == 3:
                         q[0] = -config[2][0]
-                    case 4: 
+                elif i == 4: 
                         q[1] = finger.min_limits[1]
             res_q = q 
             config.append(res_q)
         
+
+        finger = sh_fingers[1]
+            
+        if finger not in fingers_in_contact:
+            config[1][0] = config[2][0]
+
+
         config = self.config_to_real(config)
             
         return config

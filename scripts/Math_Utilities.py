@@ -1303,15 +1303,6 @@ class Unit_Ellipsoid(Surface):
     '''
 
 
-from geomdl import exchange
-from geomdl.visualization import VisVTK
-from geomdl import operations
-
-import numpy as np
-import nurbspy as nrb
-import matplotlib.pyplot as plt
-import matplotlib as mpl
-
 class Finger_NURBS(Surface):
     
     #axis = [0,0,1]
@@ -1320,52 +1311,10 @@ class Finger_NURBS(Surface):
     #inv_rotation = np.transpose(rotation)
     
     def __init__(self, path_to_json_file):
-        surface_list = exchange.import_json(path_to_json_file)
-        surf = surface_list[0]
-        n =  surf.ctrlpts_size_u
-        m = surf.ctrlpts_size_v
-        ndim = 3
-        
-        ctrlpts = np.empty((ndim ,n,m))
-        weights = np.empty((n,m))
-        
-        for i in range(n):
-            v_ctrlpoints = surf.ctrlpts[i*m :(i+1)*m]
-            v_weights = surf.weights[i*m :(i+1)*m]
-            for j in range(m):
-                ctrlpts[:,i, j] = v_ctrlpoints[j]
-                weights[i,j] = v_weights[j]
-        
-        knot_u = np.array(surf.knotvector_u)
-        knot_v = np.array(surf.knotvector_v)
-    
-        self.surface = nrb.NurbsSurface(ctrlpts,weights, surf.degree_u, surf.degree_v, knot_u, knot_v)
+        print()
         
         return       
     
-    def uv_for_surface_point(self, surface_point):
-        p = np.array([[surface_point[0]],[surface_point[1]], [surface_point[2]]])
-        
-        res = self.surface.project_point_to_surface(p)
-        u = res[0]
-        v = res[1]
-        
-        return u,v
- 
-    def F(self,u,v):
-        p = self.surface.get_value(u,v)
-        res_p = np.array([p[0][0], p[1][0], p[2][0], 1])
-        #print(res_p)
-        return res_p
-    
-    
-    def normal(self, u, v):
-        
-        n = self.surface.get_normals(u,v)
-        res_n = np.array([n[0][0], n[1][0], n[2][0]])
-        return res_n
-
-
 
 class Poly_Fit(Surface):
     

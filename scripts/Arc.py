@@ -1590,10 +1590,12 @@ class Arc:
         if idx_middel == 0:
             elements.append(array[0])
             elements.append(array[0])
-            elements.append(array[1])
+            elements.append(array[0])
+            #elements.append(array[1])
         
         elif idx_middel >= len(array)-1:
-            elements.append(array[-2])
+            #elements.append(array[-2])
+            elements.append(array[-1])
             elements.append(array[-1])
             elements.append(array[-1])
             
