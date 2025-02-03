@@ -162,6 +162,7 @@ class HandAndObjectPlot:
             
             self.plot_point_on_object(obj, obj_rotation, obj_pos, current_uv_on_obj[i])
             
+            
             self.plot_point_on_object(obj, obj_rotation, obj_pos, target_uv_on_obj[i], 'green')
             self.plot_finger_tip(finger, quv)
             
@@ -174,7 +175,18 @@ class HandAndObjectPlot:
         self.pp.set_axes()
         
         
-    
+    def plot_fingers(self, fingers, configurations):
+ 
+        
+        for i in range(0, len(fingers)):  
+            
+            finger = fingers[i]
+            quv= configurations[i]
+            color = self.Finger_colors[finger.get_index_in_shadow_hand()]
+            self.plot_finger_tip(finger, quv)
+            self.plot_finger_linesegments(finger, quv, color) 
+
+        self.pp.set_axes()
     
     def plot_fixed_fingers_and_configurations(self, obj, obj_rotation, obj_pos, fingers, configurations, uv_on_object, plot_contact_vecoters = True):
         obj.plot(self.pp, obj_rotation, obj_pos)

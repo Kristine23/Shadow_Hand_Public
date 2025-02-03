@@ -102,7 +102,10 @@ class Node_To_Node_Element_Values():
 
 class Path_Runner:
 
-    def __init__(self):
+    def __init__(self, hand_commander):
+        self.hand_commander = hand_commander
+        
+        
         # other class dependent
         dir_path = os.path.dirname(os.path.realpath(__file__))
         xml_path = dir_path+ '/Shadow_Hand_21_03_2024/world.xml'
@@ -577,7 +580,7 @@ class Path_Runner:
     def INSERT_OBJ_function(self):
         node = self.element
         self.print_dif_pos(node)
-        ind = input("b: backwards, f: forwards, adjusted and conticue: c  ")
+        ind = input("b: backwards, f: forwards, adjusted and conticue: c, enter: adjust on normals. p: plot  ")
         # ind = 'c'
         q_back = self.deliver.q_sh_from_quv([], [])
         q_forward = self.deliver.q_sh_from_quv(
@@ -597,13 +600,33 @@ class Path_Runner:
             print('going to execute path')
             go_to_new_state = True
             # if force with in limits write as well.
+        elif ind == 'p':
+            quv = self.get_current_quv()
+            pp = PyPlotting.Plot()
+            hp = PyPlotting.HandAndObjectPlot(pp)
+            hp.plot_fingers(self.fingers, quv)
+            for i in range(node.fingers_in_contact):
+                f = node.fingers_in_contact
+                idx = f.get_index_in_shadow_hand() -1
+                p = f.contact_point(quv[idx], node.fingers_configuration[i][-2], node.fingers_configuration[i][-2])
+                pp.plot_point(p, 'blue')
+            
+            pp.show()
+        else: 
+            print('go_futher')
+            
         return go_to_new_state
+    
+    
+    
+    
+    
 
-    def print_dif_pos(self, node):
-        p_calc = self.get_contact_pos(
-            node.fingers_in_contact, node.fingers_configuration)
+    def get_current_quv(self, node):
+        q_val = self.get_current_q()
 
         p_from_robot = self.get_pos_from_robot()
+        
 
         world_from_robot = []
         T = self.shadow_hand.world_from_palm
@@ -613,9 +636,13 @@ class Path_Runner:
             world_from_robot.append(np.matmul(T, p_t)[:3])
 
         for i in range(5):
-            f = self.fingers[i]
-            dif = (p_calc[i]-world_from_robot[i])*Constants.MM_TO_METERS
-            print(f.NAME, dif,  '\n')
+            f = self.fingers[i]        
+            pos = world_from_robot[i]
+            u,v = f.get_uv_from_point(pos, q_val[i])
+            q_val[i].append(u)
+            q_val[i].append(v)
+            
+        return q_val
 
     def get_contact_pos(self, fingers_in_contact, fingers_config):
         pos = [np.zeros(3) for i in range(5)]
@@ -627,128 +654,119 @@ class Path_Runner:
             pos[idx] = p
         return pos
 
-
+    
+    def get_current_q(self):
+        joints_position = self.hand_commander.get_joints_position()
+        q_for_fingers = []
+        for i in range(len(self.fingers)):
+            f = self.fingers[i]
+            q = self.get_q_from_dictionary_and_names(joints_position, f.JOINT_NAMES)
+            q_for_fingers.append(q)
+        return q_for_fingers
+        
+        
+        
+    def get_q_from_dictionary_and_names(self, joint_position, name_list):
+        q = []
+        for i in range(len(name_list)):
+            q.append(joints_position[name_list[i]])
+            
+        
+        
+['rh_FFJ1', 'rh_FFJ2', 'rh_FFJ3', 'rh_FFJ4', 'rh_MFJ1', 'rh_MFJ2', 'rh_MFJ3', 'rh_MFJ4', 'rh_RFJ1', 'rh_RFJ2',
+                           'rh_RFJ3', 'rh_RFJ4', 'rh_LFJ1', 'rh_LFJ2', 'rh_LFJ3', 'rh_LFJ4', 'rh_LFJ5', 'rh_THJ1', 'rh_THJ2', 'rh_THJ3', 'rh_THJ4', 'rh_THJ5']
 
 
 
 
 class CallBack_Functions():
 
+
     robot_force =[0 for i in range(5)]
     robot_pos = [np.zeros(3) for i in range(5)]
 
 
-    def tactile_callbackff(self, msg):
-        #p1 = msg.markers[0].points[0]
+        
+    def force_callback(self, msg):
         magnitude = 0
-
         for i in range(len(msg.markers)):
             p = msg.markers[i].points[1]
             magnitude += np.linalg.norm([p.x,p.y,p.z])
         magnitude /= len(msg.markers)
-
-        force = 803.072182237894*magnitude
+        force = 803.072182237894*magnitude -0.27123231139724746
+        return force
+    
+    def tactile_callbackff(self, msg):
+        #p1 = msg.markers[0].points[0]
+        force = self.force_callback(msg)
         with mutex1: 
             self.robot_force[0] = force
 
     
     def tactile_callbackmf(self, msg):
         #p1 = msg.markers[0].points[0]
-        magnitude = 0
-
-        for i in range(len(msg.markers)):
-            p = msg.markers[i].points[1]
-            magnitude += np.linalg.norm([p.x,p.y,p.z])
-        magnitude /= len(msg.markers)
-
-        force = 803.072182237894*magnitude
+        force = self.force_callback(msg)
         with mutex1: 
             self.robot_force[1] = force
 
     
     def tactile_callbackrf(self, msg):
         #p1 = msg.markers[0].points[0]
-        magnitude = 0
-
-        for i in range(len(msg.markers)):
-            p = msg.markers[i].points[1]
-            magnitude += np.linalg.norm([p.x,p.y,p.z])
-        magnitude /= len(msg.markers)
-
-        force = 803.072182237894*magnitude
+        force = self.force_callback(msg)
         with mutex1: 
             self.robot_force[2] = force
 
 
     def tactile_callbacklf(self, msg):
         #p1 = msg.markers[0].points[0]
-        magnitude = 0
-
-        for i in range(len(msg.markers)):
-            p = msg.markers[i].points[1]
-            magnitude += np.linalg.norm([p.x,p.y,p.z])
-        magnitude /= len(msg.markers)
-
-        force = 803.072182237894*magnitude
+        force = self.force_callback(msg)
         with mutex1: 
             self.robot_force[3] = force
 
     
     def tactile_callbackth(self, msg):
         #p1 = msg.markers[0].points[0]
-        magnitude = 0
-
-        for i in range(len(msg.markers)):
-            p = msg.markers[i].points[1]
-            magnitude += np.linalg.norm([p.x,p.y,p.z])
-        magnitude /= len(msg.markers)
-
-        force = 803.072182237894*magnitude
+        force = self.force_callback(msg)
         with mutex1: 
             self.robot_force[4] = force
+            
     
-
-
-    def pose_callbackff(self, msg):
+    def pose_callback(self, msg):
         pose = msg.pose
         xyz = pose.position
         new_pos = np.array([xyz.x, xyz.y, xyz.z])
+        return new_pos
+    
+    def pose_callbackff(self, msg):
+        pos = self.pose_callback(msg)
         with mutex2:
-            self.robot_pos[0] = new_pos
+            self.robot_pos[0] = pos
             #print('ff', self.robot_pos)
     
     def pose_callbackmf(self, msg):
-        pose = msg.pose
-        xyz = pose.position
-        new_pos = np.array([xyz.x, xyz.y, xyz.z])
+        pos = self.pose_callback(msg)
         with mutex2:
-            self.robot_pos[1] = new_pos
+            self.robot_pos[1] = pos
             #print('mf')
 
     def pose_callbackrf(self, msg):
-        pose = msg.pose
-        xyz = pose.position
-        new_pos = np.array([xyz.x, xyz.y, xyz.z])
+        pos = self.pose_callback(msg)
         with mutex2:
-            self.robot_pos[2] = new_pos
+            self.robot_pos[2] = pos
             #print('rf')
 
     def pose_callbacklf(self, msg):
-        pose = msg.pose
-        xyz = pose.position
-        new_pos = np.array([xyz.x, xyz.y, xyz.z])
+        pos = self.pose_callback(msg)
         with mutex2:
-            self.robot_pos[3] = new_pos
+            self.robot_pos[3] = pos
             #print('lf')
 
 
     def pose_callbackth(self, msg):
         #print(msg)
-        pose = msg.pose
-        xyz = pose.position
-        new_pos = np.array([xyz.x, xyz.y, xyz.z])
+        pos = self.pose_callback(msg)
         with mutex2:
-            self.robot_pos[4] = new_pos
+            self.robot_pos[4] = pos
             #print('th')
   
 
@@ -756,63 +774,52 @@ class CallBack_Functions():
 if __name__ == '__main__':
     rospy.init_node('obj_controller')
 
-    # hand_commander = SrHandCommander("right_hand")
+    hand_commander = SrHandCommander("right_hand")
 
-    # joints_position = hand_commander.get_joints_position()
+    joints_position = hand_commander.get_joints_position()
     # joints_velocity = hand_commander.get_joints_velocity()
 
-    # print(joints_position['rh_FFJ1'])
+    print(joints_position['rh_FFJ1'])
 
     call_back = CallBack_Functions()
 
-    sub = rospy.Subscriber("/rh/publish_hand_mst_markers/rh_ff_arrows", MarkerArray,
+    sub0 = rospy.Subscriber("/rh/publish_hand_mst_markers/rh_ff_arrows", MarkerArray,
                            callback=call_back.tactile_callbackff)
 
 
-    sub = rospy.Subscriber("/rh/publish_hand_mst_markers/rh_mf_arrows", MarkerArray,
+    sub1 = rospy.Subscriber("/rh/publish_hand_mst_markers/rh_mf_arrows", MarkerArray,
                            callback=call_back.tactile_callbackmf)
 
     
-    sub = rospy.Subscriber("/rh/publish_hand_mst_markers/rh_rf_arrows", MarkerArray,
+    sub2 = rospy.Subscriber("/rh/publish_hand_mst_markers/rh_rf_arrows", MarkerArray,
                            callback=call_back.tactile_callbackrf)
     
 
-    sub = rospy.Subscriber("/rh/publish_hand_mst_markers/rh_lf_arrows", MarkerArray,
+    sub3 = rospy.Subscriber("/rh/publish_hand_mst_markers/rh_lf_arrows", MarkerArray,
                            callback=call_back.tactile_callbacklf)
 
     
-    sub = rospy.Subscriber("/rh/publish_hand_mst_markers/rh_th_arrows", MarkerArray,
+    sub4 = rospy.Subscriber("/rh/publish_hand_mst_markers/rh_th_arrows", MarkerArray,
                            callback=call_back.tactile_callbackth)
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-    sub = rospy.Subscriber("/sdu/tactile/ff_cop", Marker,
+    sub5 = rospy.Subscriber("/sdu/tactile/ff_cop", Marker,
                            callback=call_back.pose_callbackff)
     
-    sub = rospy.Subscriber("/sdu/tactile/mf_cop", Marker,
+    sub6 = rospy.Subscriber("/sdu/tactile/mf_cop", Marker,
                            callback=call_back.pose_callbackmf)
 
 
-    sub = rospy.Subscriber("/sdu/tactile/rf_cop", Marker,
+    sub7 = rospy.Subscriber("/sdu/tactile/rf_cop", Marker,
                            callback=call_back.pose_callbackrf)
 
-    sub = rospy.Subscriber("/sdu/tactile/lf_cop", Marker,
+    sub8 = rospy.Subscriber("/sdu/tactile/lf_cop", Marker,
                            callback=call_back.pose_callbacklf)
     
-    sub = rospy.Subscriber("/sdu/tactile/th_cop", Marker,
+    sub9 = rospy.Subscriber("/sdu/tactile/th_cop", Marker,
                            callback=call_back.pose_callbackth)
+    
 
     pup = rospy.Publisher("/rh_trajectory_controller/command",
                           JointTrajectory, queue_size=10)
@@ -823,7 +830,7 @@ if __name__ == '__main__':
 
     rospy.loginfo('obj_controller has started')
 
-    path_runner = Path_Runner()
+    path_runner = Path_Runner(hand_commander)
     q_current = path_runner.get_current_q()
 
     while not rospy.is_shutdown():

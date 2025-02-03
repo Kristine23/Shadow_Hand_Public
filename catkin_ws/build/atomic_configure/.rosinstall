@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /workspaces/docker-ros/catkin_ws/devel/setup.sh
